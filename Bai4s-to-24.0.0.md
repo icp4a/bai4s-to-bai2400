@@ -70,6 +70,10 @@ place (see `copySnapshotToOS` function)
 
 At this point, the snapshot containing BAI4S indices is inside OpenSearch, ready to load.
 
+Note: The communication to Opensearch goes through cluster proxys that may cut the connection if the request does not complete within 30 seconds. Messages
+like **Gateway issue** or **Response: 506** typically indicates a proxy time out rather than a real issue. It means the operation will probably complete correctly,
+but later. The commands in this section can take several minutes to complete, according to the volume of data to process.
+
 - run `restoreSnapshotOnOS` to load indices. However the indice names and mappings has changed. The next command will inject the old
 indices into new indices that have been created by default. 
 - run `transformIndices` to update the indices with BAI4S content. This command also delete the old indices. In case of trouble, redo the cycle
