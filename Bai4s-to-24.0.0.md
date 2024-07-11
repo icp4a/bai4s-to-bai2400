@@ -1,6 +1,8 @@
 
 # Migration guide from BAI for Server to Kubernetes v24.0.0
 
+This guide describes how to migrate data from BAI4S to BAI 24.0.0 (K8S version).
+
 This guide is associated to a bash script `helper.sh` that defines functions to ease the migration
 from BAI4S to K8S.
 
@@ -36,10 +38,10 @@ If a step can not be performed, it is suggested to edit the function in `helper.
 ### Prepare the migration
 
 - Open a bash session on the machine where BAI4S is installed. Be sure to have `jq` and `oc` installed.
-- Shut down the emiters and wait for BAI to become idle.
+- Shut down the emitters and wait for BAI to become idle.
 - Run the commands below:
 
-```
+```shell
 # set BAI4S_INSTALL_DIR to the BAI4S installation root dir.
 BAI4S_INSTALL_DIR=/opt/ibm/BAI4S
 source helper.sh
@@ -51,7 +53,7 @@ shell, be sure to source again the file before performing any other action.
 ###  Operations on BAI4S
 
 - Run `initBAI4Senv` to set Elasticsearch credentials.
-- Run `patchBAI4S` once for all. This command enable snapshots in BAI4S by patching ElasticSearch configuration file, and restart ElasticSearch.
+- Run `patchBAI4S` once for all. This command enables snapshots in BAI4S by patching ElasticSearch configuration file, and restarts ElasticSearch.
 Wait a bit ElasticSearch is up and running.
 - Run `makeSnapshot` to create a snapshot. If the snapshot must be refreshed, use the command `deleteSnapshot` to clear the snapshot.
 - At this point BAI4S is not needed any more, it should be stopped.
@@ -62,9 +64,11 @@ The snapshot is stored on the filesystem as a tree of files. The next step will 
 to have access of the current filesystem and the target cluster in the same session. Otherwise, copy the snapshot directory to a better
 place (see `copySnapshotToOS` function)
 
-- Log in the cluster, using `oc login ...`.
+Note: The script uses `oc`, assuming the cluster is OpenShift. For other flavors run `alias oc=kubectl` to use standard K8S cli.
+
+- Log in to the cluster, using `oc login ...`.
 - run `getOScredentials` to initialize credentials variables.
-- run `copySnapshotToOS ` to upload the snapshot. Do it once.
+- run `copySnapshotToOS` to upload the snapshot. Do it once.
 
 ### Restore data
 
@@ -74,8 +78,8 @@ Note: The communication to Opensearch goes through cluster proxys that may cut t
 like **Gateway issue** or **Response: 506** typically indicates a proxy time out rather than a real issue. It means the operation will probably complete correctly,
 but later. The commands in this section can take several minutes to complete, according to the volume of data to process.
 
-- run `restoreSnapshotOnOS` to load indices. However the indice names and mappings has changed. The next command will inject the old
-indices into new indices that have been created by default. 
+- run `restoreSnapshotOnOS` to load indices. However the index names and mappings have changed. The next command will inject the old
+indices into new indices that have been created by default.
 - run `transformIndices` to update the indices with BAI4S content. This command also delete the old indices. In case of trouble, redo the cycle
 `restoreSnapshotOnOS` and `transformIndices`.
 

@@ -26,7 +26,7 @@ function initBAI4Senv () {
 function patchBAI4S() {
     # patch ES config to add path.repo and restart ES
     echo "Patching ElasticSearch config file."
-    echo 'path.repo: /usr/share/elasticsearch/data/snapshots' >> "${BAI4S_INSTALL_DIR?}/config/kibana/elasticsearch.yml"
+    echo 'path.repo: ["/usr/share/elasticsearch/data/snapshots"]' >> "${BAI4S_INSTALL_DIR?}/config/kibana/elasticsearch.yml"
     # restart es
     read -r -p "Ok to restart ElasticSearch? [y/N] " -n 1
     echo
@@ -40,9 +40,9 @@ function patchBAI4S() {
 function docker-compose-cli() {
   # docker-compose broke compatibility with .env policy
   if docker-compose --help | grep -q 'env-file PATH'  ; then
-    docker-compose -f "${BAI4S_INSTALL_DIR}/data/bai.yml" --env-file "${BAI4S_INSTALL_DIR}/.env" $*
+    docker-compose -f "${BAI4S_INSTALL_DIR}/data/bai.yml" --env-file "${BAI4S_INSTALL_DIR}/.env" "$@"
   else
-    docker-compose -f "${BAI4S_INSTALL_DIR}/data/bai.yml" $*
+    docker-compose -f "${BAI4S_INSTALL_DIR}/data/bai.yml" "$@"
   fi
 }
 
